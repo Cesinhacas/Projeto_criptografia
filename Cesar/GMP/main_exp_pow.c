@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <gmp.h>
 
-int pow_mod(mpz_t aux, mpz_t base, mpz_t exp, mpz_t mod)
+void pow_mod(mpz_t aux, mpz_t base, mpz_t exp, mpz_t mod)
 {
     //Inicialização das variáveis
     mpz_t base1, exp1;
@@ -11,7 +11,6 @@ int pow_mod(mpz_t aux, mpz_t base, mpz_t exp, mpz_t mod)
     mpz_init_set(exp1, exp);
     mpz_set_si(aux, 1);
     
-    //
     while(mpz_cmp_ui(exp1, 0) > 0)
     {
         
@@ -32,7 +31,7 @@ int pow_mod(mpz_t aux, mpz_t base, mpz_t exp, mpz_t mod)
 int main() {
     // Criando variáveis
     mpz_t q, p, n, phi, e, d, aux, s, t, exp_mod_resul, mult, mod;
-    unsigned long seed; // Inicialize a seed
+    unsigned long seed; // Inicializando a seed
 
     // Iniciando as variáveis
     mpz_inits(q, p, n, phi, e, d, aux, s, t, exp_mod_resul, mult, mod, NULL);
@@ -88,7 +87,9 @@ int main() {
 
     mpz_t env, rec, crip;
     mpz_inits(env, rec, crip, NULL);
-    
+
+
+    mpz_set_ui(env, 12345);
     gmp_printf("Mensagem enviada: %Zd\n", env);
     pow_mod(crip, env, e, n);
     gmp_printf("Mensagem encriptada: %Zd\n", crip);
