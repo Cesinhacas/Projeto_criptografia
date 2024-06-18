@@ -1,6 +1,4 @@
 #include <stdio.h>
-#include <benchmark/benchmark.h>
-
 
 int exp_mod(int base, int exp, int mod)
 {
