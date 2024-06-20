@@ -82,11 +82,11 @@ void main() {
     gmp_randseed_ui(rstate, seed);
 
     // Gerando 'q' e 'p' como um número aleatório
-    mpz_urandomb(aux, rstate, 128);
+    mpz_urandomb(aux, rstate, 1024);
     NextPrime(q, aux);
     gmp_printf("q =   %Zd\n", q);
 
-    mpz_urandomb(aux, rstate, 128);
+    mpz_urandomb(aux, rstate, 1024);
     NextPrime(p, aux);
     gmp_printf("p =   %Zd\n", p);
 
@@ -129,7 +129,7 @@ void main() {
     mpz_inits(env, rec, crip, NULL);
 
 
-    mpz_urandomb(env, rstate, 60);;
+    mpz_urandomb(env, rstate, 512);;
     gmp_printf("Mensagem enviada: %Zd\n", env);
     pow_mod(crip, env, e, n);
     gmp_printf("Mensagem encriptada: %Zd\n", crip);

@@ -40,10 +40,10 @@ int cryp()
     gmp_randseed_ui(rstate, seed);
 
     // Gerando 'q' e 'p' como um número aleatório
-    mpz_urandomb(aux, rstate, 128);
+    mpz_urandomb(aux, rstate, 512);
     mpz_nextprime(q, aux);
 
-    mpz_urandomb(aux, rstate, 128);
+    mpz_urandomb(aux, rstate, 512);
     mpz_nextprime(p, aux);
 
     // Calculando 'n' e 'phi'
@@ -70,7 +70,7 @@ int cryp()
     mpz_t env, rec, crip;
     mpz_inits(env, rec, crip, NULL);
 
-    mpz_set_ui(env, 12345);
+    mpz_urandomb(env, rstate, 128);
     pow_mod(crip, env, e, n);
     pow_mod(rec, crip, d, n);
 
