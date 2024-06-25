@@ -24,11 +24,10 @@ void pow_mod(mpz_t aux, mpz_t base, mpz_t exp, mpz_t mod)
     mpz_mod(aux, aux, mod);
     mpz_clears(base1, exp1, NULL);
 }
-
-int cryp()
+int param(mpz_t n, mpz_t e, mpz_t d)
 {
     // Criando variáveis
-    mpz_t q, p, n, phi, e, d, aux, s, t, mult, mod;
+    mpz_t q, p, phi, aux, s, t, mult, mod;
     unsigned long seed; // Inicializando a seed
 
     // Iniciando as variáveis
@@ -66,29 +65,57 @@ int cryp()
         mpz_add(d, d, phi);
     }
 
-    // Procedimento de encriptar e deseencriptar
-    mpz_t env, rec, crip;
-    mpz_inits(env, rec, crip, NULL);
+    mpz_clears(q, p, phi, aux, s, t, mult, mod, q_minus_1, p_minus_1, NULL);
+    gmp_randclear(rstate);
 
-    mpz_urandomb(env, rstate, 128);
+    return 0;
+}
+int cryp(mpz_t e, mpz_t d, mpz_t n, mpz_t env)
+{
+    // Procedimento de encriptar e deseencriptar
+    mpz_t rec, crip;
+    mpz_inits(rec, crip, NULL);
+
     pow_mod(crip, env, e, n);
     pow_mod(rec, crip, d, n);
 
     // Liberar recursos
-    mpz_clears(q, p, n, phi, e, d, aux, s, t, mult, mod, q_minus_1, p_minus_1, env, rec, crip, NULL);
-    gmp_randclear(rstate);
+    mpz_clears(rec, crip, NULL);
+
     return 0;
 }
 
-// Função de benchmark
-void BM_CryptoBenchmark(benchmark::State& state) {
+void BM_param(benchmark::State& state)
+{
+    mpz_t n, e, d;
+    mpz_inits(n, e, d, NULL);
     for (auto _ : state) {
-        cryp();
+        param(n, e, d);        
     }
+    mpz_clears(n, e, d, NULL);
+}
+
+// Função de benchmark
+void BM_cypher(benchmark::State& state)
+{
+    mpz_t e, d, n, env;
+    mpz_inits(n, e, d, env, NULL);
+    unsigned long seed;
+    param(n, e, d);
+    gmp_randstate_t rstate;
+    gmp_randinit_mt(rstate);
+    gmp_randseed_ui(rstate, seed);
+
+    for (auto _ : state) {
+        mpz_urandomb(env, rstate, 128);
+        cryp(e, d, n, env);
+    }
+    mpz_clears(e, d, n, env, NULL);
 }
 
 // Registra a função de benchmark
-BENCHMARK(BM_CryptoBenchmark);
+BENCHMARK(BM_param)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_cypher)->Unit(benchmark::kMillisecond);
 
 // Define o ponto de entrada do Google Benchmark
 BENCHMARK_MAIN();

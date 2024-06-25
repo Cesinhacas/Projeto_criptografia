@@ -1,14 +1,14 @@
 #include <gmp.h>
 #include <benchmark/benchmark.h>
 
-int cryp()
+int param(mpz_t n, mpz_t e, mpz_t d)
 {
     // Criando variáveis
-    mpz_t q, p, n, phi, e, d, aux, s, t, mult, mod;
+    mpz_t q, p, phi, aux, s, t, mult, mod, env;
     unsigned long seed; // Inicialize a seed
     
     // Iniciando as variáveis
-    mpz_inits(q, p, n, phi, e, d, aux, s, t, mult, mod, NULL);
+    mpz_inits(q, p, phi, aux, s, t, mult, mod, env, NULL);
 
     // Inicializando o gerador de números aleatórios
     gmp_randstate_t rstate;
@@ -46,28 +46,59 @@ int cryp()
     }
 
 
-    //Procedimento de encriptar e deseencriptar
-    mpz_t env, rec, crip;
-    mpz_inits(env, rec, crip, NULL);
+    mpz_clears(q, p, phi, aux, s, t, mult, mod, q_minus_1, p_minus_1, env, NULL);
 
-    mpz_urandomb(env, rstate, 128);
+    return 0;
+}
+
+int cryp(mpz_t e, mpz_t d, mpz_t n, mpz_t env)
+{
+    //Procedimento de encriptar e deseencriptar
+    mpz_t rec, crip;
+    mpz_inits(rec, crip, NULL);
+    gmp_randstate_t rstate;
+    gmp_randinit_mt(rstate);
+
     mpz_powm(crip, env, e, n);
     mpz_powm(rec, crip, d, n);
 
     // Liberar recursos
-    mpz_clears(q, p, n, phi, e, d, aux, s, t, mult, mod, q_minus_1, p_minus_1, env, rec, crip, NULL);
+    mpz_clears(rec, crip, NULL);
     gmp_randclear(rstate);
     return 0;
 }
 
-void BM_CryptoBenchmark(benchmark::State& state) {
+void BM_param(benchmark::State& state)
+{
+    mpz_t n, e, d;
+    mpz_inits(n, e, d, NULL);
     for (auto _ : state) {
-        cryp();        
+        param(n, e, d);        
     }
+    mpz_clears(n, e, d, NULL);
+}
+
+void BM_cypher(benchmark::State& state)
+{
+    mpz_t e, d, n, env;
+    mpz_inits(n, e, d, env, NULL);
+    unsigned long seed;
+    param(n, e, d);
+    gmp_randstate_t rstate;
+    gmp_randinit_mt(rstate);
+    gmp_randseed_ui(rstate, seed);
+
+    for(auto _: state)
+    {
+        mpz_urandomb(env, rstate, 128);
+        cryp(e, d, n, env);
+    }
+    mpz_clears(e, d, n, env, NULL);
 }
 
 // Registra a função de benchmark
-BENCHMARK(BM_CryptoBenchmark)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_param)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_cypher)->Unit(benchmark::kMillisecond);
 
 // Define o ponto de entrada do Google Benchmark
 BENCHMARK_MAIN();
